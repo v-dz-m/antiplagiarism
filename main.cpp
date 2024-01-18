@@ -20,6 +20,7 @@ int main()
 {
     string text = getTextFromFile("source.txt");
     string fragment = getFragmentFromInput();
+    cout << endl << "Original text:" << endl << text << endl << endl;
 
     int percent = antiPlagiarism(text, fragment);
     cout << "The identified borrowing percentage of text is " << percent << "%" << endl;
