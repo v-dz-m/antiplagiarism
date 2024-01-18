@@ -21,7 +21,8 @@ int main()
     string text = getTextFromFile("source.txt");
     string fragment = getFragmentFromInput();
 
-    cout << "The identified borrowing percentage of text is " << antiPlagiarism(text, fragment) << "%" << endl;
+    int percent = antiPlagiarism(text, fragment);
+    cout << "The identified borrowing percentage of text is " << percent << "%" << endl;
 
     return 0;
 }
@@ -39,7 +40,7 @@ string getTextFromFile(string fileName)
 string getFragmentFromInput()
 {
     string content;
-    cout << "Please, enter your fragment for a check: ";
+    cout << "Please, enter your fragment for checking: ";
     getline(cin >> ws, content);
 
     return content;
@@ -48,11 +49,19 @@ string getFragmentFromInput()
 double antiPlagiarism(string text, string fragment)
 {
     const int STEP = 3;
+    const int FRAGMENT_MIN = 3;
+    const int TEXT_MIN = 10;
     int matchCounter = 0;
     int totalCounter = 0;
 
     vector<string> fragmentWords = getWords(fragment);
     vector<string> textWords = getWords(text);
+
+    if (fragmentWords.size() < FRAGMENT_MIN || textWords.size() < TEXT_MIN) {
+        cout << endl << "ERROR! Word counts in text and fragment are insufficient for checking!" << endl;
+        cout << TEXT_MIN << " words for text and " << FRAGMENT_MIN << " words for fragment required (excluding special characters, conjunctions, particles, pronouns)." << endl << endl;
+        return 0;
+    }
 
     retraceTheShingles(fragmentWords, textWords, STEP, matchCounter, totalCounter);
 
