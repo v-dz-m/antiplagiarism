@@ -9,6 +9,8 @@ vector<string> getWords(string input);
 bool isSeparator(char symbol);
 bool isJoinSeparator(char symbol);
 bool isWordOkay(string word);
+void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter);
+bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
 
 int main()
 {
@@ -27,15 +29,7 @@ double antiPlagiarism(string text, string fragment)
     vector<string> fragmentWords = getWords(fragment);
     vector<string> textWords = getWords(text);
 
-    for (int i = STEP - 1; i < fragmentWords.size(); i++) {
-        for (int j = STEP - 1; j < textWords.size(); j++) {
-            if (fragmentWords[i] == textWords[j] && fragmentWords[i - 1] == textWords[j - 1] && fragmentWords[i - 2] == textWords[j - 2]) {
-                matchCounter += 1;
-                break;
-            }
-        }
-        totalCounter++;
-    }
+    retraceTheShingles(fragmentWords, textWords, STEP, matchCounter, totalCounter);
 
     cout << "Matches: " << matchCounter << endl;
     cout << "Total: " << totalCounter << endl;
@@ -76,6 +70,7 @@ bool isSeparator(char symbol)
         if (symbol == SEPARATORS[i])
             return true;
     }
+
     return false;
 }
 
@@ -96,6 +91,32 @@ bool isWordOkay(string word)
     for (int i = 0; i < 28; i++) {
         if (word == pronouns[i])
             return false;
+    }
+
+    return true;
+}
+
+void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter)
+{
+    int start = step - 1;
+    for (int i = start; i < fragmentWords.size(); i++) {
+        for (int j = start; j < textWords.size(); j++) {
+            if (isSamplesEqual) {
+                matchCounter++;
+                break;
+            }
+        }
+        totalCounter++;
+    }
+}
+
+bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords)
+{
+    int count = start;
+    while (count >= 0) {
+        if (fragmentWords[firstIndex - count] != textWords[secondIndex - count--]) {
+            return false;
+        }
     }
 
     return true;
