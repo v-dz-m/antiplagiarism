@@ -12,8 +12,9 @@ vector<string> getWords(string input);
 bool isJoinSeparator(char symbol);
 bool isSeparator(char symbol);
 bool isWordOkay(string word);
+bool isWordsAreEqual(string first, string second);
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter);
-bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
+bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
 
 int main()
 {
@@ -75,7 +76,8 @@ vector<string> getWords(string input)
             word[iw++] = tolower(input[i]);
             if (isSeparator(input[i + 1]) || input[i + 1] == 0) {
                 word[iw] = 0;
-                if (isWordOkay(word) && lastWord != word) {
+                string newWord = word;
+                if (isWordOkay(word) && !isWordsAreEqual(newWord, lastWord)) {
                     words.push_back(word);
                     lastWord = word;
                 }
@@ -120,12 +122,26 @@ bool isWordOkay(string word)
     return true;
 }
 
+bool isWordsAreEqual(string first, string second)
+{
+    if (first.size() != second.size()) {
+        return false;
+    }
+    for (int i = 0; i < first.size(); i++) {
+        if (first[i] != second[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter)
 {
     int start = step - 1;
     for (int i = start; i < fragmentWords.size(); i++) {
         for (int j = start; j < textWords.size(); j++) {
-            if (isSamplesEqual(start, i, j, fragmentWords, textWords)) {
+            if (isSamplesAreEqual(start, i, j, fragmentWords, textWords)) {
                 matchCounter++;
                 break;
             }
@@ -134,14 +150,14 @@ void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, 
     }
 }
 
-bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords)
+bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords)
 {
     int count = start;
     while (count >= 0) {
-        string currentWord = fragmentWords[firstIndex - count];
-        if (currentWord.compare(textWords[secondIndex - count--])) {
+        if (!isWordsAreEqual(fragmentWords[firstIndex - count], textWords[secondIndex - count])) {
             return false;
         }
+        count--;
     }
 
     return true;
