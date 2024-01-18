@@ -1,23 +1,47 @@
 #include <iostream>
+#include <fstream>
 #include <cstring>
 #include <vector>
 
 using namespace std;
 
+string getTextFromFile(string fileName);
+string getFragmentFromInput();
 double antiPlagiarism(string text, string fragment);
 vector<string> getWords(string input);
-bool isSeparator(char symbol);
 bool isJoinSeparator(char symbol);
+bool isSeparator(char symbol);
 bool isWordOkay(string word);
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter);
 bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
 
 int main()
 {
-    string text = "Plagiarism is the representation of another person's language, thoughts, ideas, or expressions as one's own original work. Although precise definitions vary depending on the institution, in many countries and cultures plagiarism is considered a violation of academic integrity and journalistic ethics, as well as social norms around learning, teaching, research, fairness, respect, and responsibility. As such, a person or entity that is determined to have committed plagiarism is often subject to various punishments or sanctions, such as suspension, expulsion from school or work, fines, imprisonment, and other penalties. Plagiarism is typically not in itself a crime, but like counterfeiting, fraud can be punished in a court for prejudices caused by copyright infringement, violation of moral rights, or torts. In academia and in industry, it is a serious ethical offense. Plagiarism and copyright infringement overlap to a considerable extent, but they are not equivalent concepts, and although many types of plagiarism may not meet the legal requirements in copyright law as adjudicated by courts, they still constitute the passing-off of another's work as one's own, and thus plagiarism. Not all cultures and countries hold the same beliefs about personal ownership of language or ideas. In some cultures, the reiteration of another professional's work can be a sign of respect or flattery towards the person whose work is reiterated. Students who are from such countries and cultures and who move to the United States or other Western countries (where plagiarism is frowned upon) may find the transition difficult.";
-    string fragment = "Plagiarism is often subject to various punishments or sanctions, such as suspension, expulsion from school or work, fines, imprisonment, and other penalties.";
-    cout << antiPlagiarism(text, fragment) << "%" << endl;
+    string text = getTextFromFile("source.txt");
+    string fragment = getFragmentFromInput();
+
+    cout << "The identified borrowing percentage of text is " << antiPlagiarism(text, fragment) << "%" << endl;
+
     return 0;
+}
+
+string getTextFromFile(string fileName)
+{
+    string fileContent;
+    ifstream fileStream;
+    fileStream.open(fileName);
+    getline(fileStream, fileContent);
+
+    return fileContent;
+}
+
+string getFragmentFromInput()
+{
+    string content;
+    cout << "Please, enter your fragment for a check: ";
+    getline(cin >> ws, content);
+
+    return content;
 }
 
 double antiPlagiarism(string text, string fragment)
@@ -31,29 +55,29 @@ double antiPlagiarism(string text, string fragment)
 
     retraceTheShingles(fragmentWords, textWords, STEP, matchCounter, totalCounter);
 
-    cout << "Matches: " << matchCounter << endl;
-    cout << "Total: " << totalCounter << endl;
-
     return ((double)matchCounter / totalCounter) * 100;
 }
 
 vector<string> getWords(string input)
 {
-    vector<string> words = {};
-    const int N = 96;
+    const int LETTERS_WORD_MAX = 64;
     int i = 0;
-    char word[N];
     int iw = 0;
-    for (i = 0; input[i] != '\0'; i++) {
+    char word[LETTERS_WORD_MAX];
+    string lastWord;
+    vector<string> words = {};
+
+    for (i = 0; input[i] != 0; i++) {
         if (isJoinSeparator(input[i])) {
             continue;
         }
         if (!isSeparator(input[i])) {
             word[iw++] = tolower(input[i]);
-            if (isSeparator(input[i + 1]) || input[i + 1] == '\0') {
-                word[iw] = '\0';
-                if (isWordOkay(word)) {
+            if (isSeparator(input[i + 1]) || input[i + 1] == 0) {
+                word[iw] = 0;
+                if (isWordOkay(word) && lastWord != word) {
                     words.push_back(word);
+                    lastWord = word;
                 }
                 iw = 0;
             }
@@ -63,20 +87,20 @@ vector<string> getWords(string input)
     return words;
 }
 
+bool isJoinSeparator(char symbol)
+{
+    return symbol == '\'' || symbol == '-';
+}
+
 bool isSeparator(char symbol)
 {
     const char SEPARATORS[] = " .,;:!?\"“”‘’()[]{}+*/=«»„“—–";
-    for (int i = 0; SEPARATORS[i] != '\0'; i++) {
+    for (int i = 0; SEPARATORS[i] != 0; i++) {
         if (symbol == SEPARATORS[i])
             return true;
     }
 
     return false;
-}
-
-bool isJoinSeparator(char symbol)
-{
-    return symbol == '\'' || symbol == '-';
 }
 
 bool isWordOkay(string word)
@@ -101,7 +125,7 @@ void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, 
     int start = step - 1;
     for (int i = start; i < fragmentWords.size(); i++) {
         for (int j = start; j < textWords.size(); j++) {
-            if (isSamplesEqual) {
+            if (isSamplesEqual(start, i, j, fragmentWords, textWords)) {
                 matchCounter++;
                 break;
             }
@@ -114,7 +138,8 @@ bool isSamplesEqual(int start, int firstIndex, int secondIndex, vector<string> f
 {
     int count = start;
     while (count >= 0) {
-        if (fragmentWords[firstIndex - count] != textWords[secondIndex - count--]) {
+        string currentWord = fragmentWords[firstIndex - count];
+        if (currentWord.compare(textWords[secondIndex - count--])) {
             return false;
         }
     }
