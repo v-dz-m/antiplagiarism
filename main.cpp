@@ -13,6 +13,7 @@ bool isJoinSeparator(char symbol);
 bool isSeparator(char symbol);
 bool isWordOkay(string word);
 bool isWordsAreEqual(string first, string second);
+bool isEnoughWords(int fragmentCount, int textCount);
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter);
 bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
 void printResult(int value);
@@ -51,19 +52,14 @@ string getFragmentFromInput()
 double antiPlagiarism(string text, string fragment)
 {
     const int STEP = 3;
-    const int FRAGMENT_MIN = 3;
-    const int TEXT_MIN = 10;
     int matchCounter = 0;
     int totalCounter = 0;
 
     vector<string> fragmentWords = getWords(fragment);
     vector<string> textWords = getWords(text);
 
-    if (fragmentWords.size() < FRAGMENT_MIN || textWords.size() < TEXT_MIN) {
-        cout << endl << "ERROR! Word counts in text and fragment are insufficient for checking!" << endl;
-        cout << TEXT_MIN << " words for text and " << FRAGMENT_MIN << " words for fragment required (excluding special characters, conjunctions, particles, pronouns)." << endl << endl;
+    if (!isEnoughWords(fragmentWords.size(), textWords.size()))
         return 0;
-    }
 
     retraceTheShingles(fragmentWords, textWords, STEP, matchCounter, totalCounter);
 
@@ -147,6 +143,19 @@ bool isWordsAreEqual(string first, string second)
     return true;
 }
 
+bool isEnoughWords(int fragmentCount, int textCount)
+{
+    const int FRAGMENT_MIN = 3;
+    const int TEXT_MIN = 10;
+    if (fragmentCount < FRAGMENT_MIN || textCount < TEXT_MIN) {
+        cout << endl << "ERROR! Word counts in text and fragment are insufficient for checking!" << endl;
+        cout << TEXT_MIN << " words for text and " << FRAGMENT_MIN << " words for fragment required (excluding special characters, conjunctions, particles, pronouns)." << endl << endl;
+        return false;
+    }
+
+    return true;
+}
+
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter)
 {
     int start = step - 1;
@@ -177,7 +186,6 @@ bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string
 void printResult(int value)
 {
     const int BAR_STEP = 10;
-
     cout << "The identified borrowing percentage of text is " << value << "%: ";
     for (int i = 0; i < 100; i += BAR_STEP) {
         cout << (i < value ? "█ " : "▓ ");
