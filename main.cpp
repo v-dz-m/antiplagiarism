@@ -15,6 +15,7 @@ bool isWordOkay(string word);
 bool isWordsAreEqual(string first, string second);
 void retraceTheShingles(vector<string> fragmentWords, vector<string> textWords, int step, int& matchCounter, int& totalCounter);
 bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string> fragmentWords, vector<string> textWords);
+void printResult(int value);
 
 int main()
 {
@@ -23,7 +24,7 @@ int main()
     cout << endl << "Original text:" << endl << text << endl << endl;
 
     int percent = antiPlagiarism(text, fragment);
-    cout << "The identified borrowing percentage of text is " << percent << "%" << endl;
+    printResult(percent);
 
     return 0;
 }
@@ -41,7 +42,7 @@ string getTextFromFile(string fileName)
 string getFragmentFromInput()
 {
     string content;
-    cout << "Please, enter your fragment for checking: ";
+    cout << endl << "Please, enter your fragment for checking: ";
     getline(cin >> ws, content);
 
     return content;
@@ -171,4 +172,15 @@ bool isSamplesAreEqual(int start, int firstIndex, int secondIndex, vector<string
     }
 
     return true;
+}
+
+void printResult(int value)
+{
+    const int BAR_STEP = 10;
+
+    cout << "The identified borrowing percentage of text is " << value << "%: ";
+    for (int i = 0; i < 100; i += BAR_STEP) {
+        cout << (i < value ? "█ " : "▓ ");
+    }
+    cout << endl;
 }
